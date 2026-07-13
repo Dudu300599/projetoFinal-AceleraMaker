@@ -49,7 +49,7 @@ Abaixo estão algumas demonstrações da interface gráfica construída para fac
 
 ![Cadastro do Cliente](assets/cadastro.png)
 
-![Atualizacao do Cliente ](assets/atualizacao.png)
+![Atualizacao do Cliente ](assets/atualizar.png)
 
 ---
 
