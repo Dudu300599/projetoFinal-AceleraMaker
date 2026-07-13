@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Cobol/">
+    <File Path="CLIENTES.cbl" />
+  </Folder>
+  <Project Path="CooperativaAlfa.Api/CooperativaAlfa.Api.csproj" />
+  <Project Path="CooperativaAlfa.Testes/CooperativaAlfa.Testes.csproj" />
+</Solution>

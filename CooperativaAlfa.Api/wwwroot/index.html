@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooperativa Alfa - Atendimento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Portal de Atendimento - Cooperativa Alfa</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="mensagemAlerta" class="alert d-none" role="alert"></div>
+                            <form id="formCliente">
+                                <div class="row">
+                                    <!-- Campo CPF Unificado com o Botão de Consulta -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="inputCpf" class="form-label">CPF (Apenas números)</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="inputCpf" maxlength="11" required placeholder="Ex: 12345678901">
+                                            <button class="btn btn-outline-primary" id="btnConsultar" type="button" onclick="consultarCliente()">Consultar</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="inputNome" class="form-label">Nome Completo</label>
+                                        <input type="text" class="form-control" id="inputNome" maxlength="30" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="inputTelefone" class="form-label">Telefone</label>
+                                        <input type="tel" class="form-control" id="inputTelefone" pattern="[0-9]+" maxlength="15" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="inputEmail" class="form-label">E-mail</label>
+                                        <input type="email" class="form-control" id="inputEmail" maxlength="40" required>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="button" class="btn btn-primary" onclick="cadastrarCliente()" id="btnCadastrar">Novo Cadastro</button>
+                                    <button type="button" class="btn btn-success" onclick="salvarAlteracoes()" id="btnAtualizar" disabled>Salvar Edição</button>
+                                    <button type="button" class="btn btn-danger" onclick="excluirCliente()" id="btnExcluir" disabled>Excluir</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        const baseUrl = '/api/clientes';
+
+        function mostrarMensagem(texto, tipo) {
+            const alerta = document.getElementById('mensagemAlerta');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.innerText = texto;
+            alerta.classList.remove('d-none');
+            setTimeout(() => alerta.classList.add('d-none'), 5000);
+        }
+
+        function setCarregando(botaoId, carregando, textoOriginal) {
+            const btn = document.getElementById(botaoId);
+            if (carregando) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            }
+        }
+
+        function limparFormulario(manterCpf = false) {
+            document.getElementById('inputNome').value = '';
+            document.getElementById('inputTelefone').value = '';
+            document.getElementById('inputEmail').value = '';
+
+            if (!manterCpf) {
+                document.getElementById('inputCpf').value = '';
+            }
+
+            document.getElementById('btnAtualizar').disabled = true;
+            document.getElementById('btnExcluir').disabled = true;
+        }
+
+        function coletarDadosFormulario() {
+            return {
+                cpf: document.getElementById('inputCpf').value,
+                nome: document.getElementById('inputNome').value,
+                telefone: document.getElementById('inputTelefone').value,
+                email: document.getElementById('inputEmail').value
+            };
+        }
+
+        async function consultarCliente() {
+            // Agora lê direto do input principal do formulário
+            const cpfBusca = document.getElementById('inputCpf').value;
+            if (!cpfBusca) return mostrarMensagem('Por favor, informe o CPF para busca.', 'warning');
+
+            setCarregando('btnConsultar', true, 'Consultar');
+
+            try {
+                const response = await fetch(`${baseUrl}/${cpfBusca}`);
+                if (response.status === 404) {
+                    // Passa true para limpar os outros campos, mas preservar o CPF digitado
+                    limparFormulario(true);
+                    mostrarMensagem('Cliente não encontrado. Você pode preencher os dados para um Novo Cadastro.', 'warning');
+                    return;
+                }
+
+                const cliente = await response.json();
+                document.getElementById('inputNome').value = cliente.nome;
+                document.getElementById('inputCpf').value = cliente.cpf;
+                document.getElementById('inputTelefone').value = cliente.telefone;
+                document.getElementById('inputEmail').value = cliente.email;
+
+                document.getElementById('btnAtualizar').disabled = false;
+                document.getElementById('btnExcluir').disabled = false;
+
+                mostrarMensagem('Cliente localizado.', 'success');
+            } catch (error) {
+                mostrarMensagem('Erro de comunicação.', 'danger');
+            } finally {
+                setCarregando('btnConsultar', false, 'Consultar');
+            }
+        }
+
+        async function cadastrarCliente() {
+            const dados = coletarDadosFormulario();
+            if (dados.cpf.length !== 11) return mostrarMensagem('CPF inválido.', 'warning');
+
+            setCarregando('btnCadastrar', true, 'Novo Cadastro');
+
+            try {
+                const response = await fetch(baseUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                if (response.status === 201) mostrarMensagem('Cadastrado com sucesso!', 'success');
+                else if (response.status === 409) mostrarMensagem('Erro: CPF já cadastrado.', 'danger');
+                else mostrarMensagem('Erro ao cadastrar.', 'danger');
+            } catch (error) {
+                mostrarMensagem('Erro de servidor.', 'danger');
+            } finally {
+                setCarregando('btnCadastrar', false, 'Novo Cadastro');
+            }
+        }
+
+        async function salvarAlteracoes() {
+            const dados = coletarDadosFormulario();
+            setCarregando('btnAtualizar', true, 'Salvar Edição');
+            try {
+                const response = await fetch(`${baseUrl}/${dados.cpf}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                if (response.ok) mostrarMensagem('Atualizado!', 'success');
+                else mostrarMensagem('Erro na atualização.', 'danger');
+            } catch (error) {
+                mostrarMensagem('Erro de servidor.', 'danger');
+            } finally {
+                setCarregando('btnAtualizar', false, 'Salvar Edição');
+            }
+        }
+
+        async function excluirCliente() {
+            const cpf = document.getElementById('inputCpf').value;
+            if (confirm(`Excluir o CPF ${cpf}?`)) {
+                setCarregando('btnExcluir', true, 'Excluir');
+                try {
+                    const response = await fetch(`${baseUrl}/${cpf}`, { method: 'DELETE' });
+                    if (response.status === 204) {
+                        mostrarMensagem('Cliente excluído.', 'success');
+                        limparFormulario();
+                    }
+                } catch (error) {
+                    mostrarMensagem('Erro ao excluir.', 'danger');
+                } finally {
+                    setCarregando('btnExcluir', false, 'Excluir');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

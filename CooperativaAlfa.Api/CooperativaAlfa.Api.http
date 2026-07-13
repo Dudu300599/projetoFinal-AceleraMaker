@@ -1,0 +1,6 @@
+@CooperativaAlfa.Api_HostAddress = http://localhost:5125
+
+GET {{CooperativaAlfa.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
