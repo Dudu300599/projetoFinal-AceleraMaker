@@ -47,9 +47,9 @@ A organização do código-fonte segue as melhores práticas de separação de r
 
 Abaixo estão algumas demonstrações da interface gráfica construída para facilitar o uso da solução pelos atendentes.
 
-![Tela de Consulta de Cliente](caminho/para/sua_imagem_consulta.png)
+![Cadastro do Cliente](assets/cadastro.png)
 
-![Tela de Cadastro com Sucesso](caminho/para/sua_imagem_cadastro_sucesso.png)
+![Atualizacao do Cliente ](assets/atualizacao.png)
 
 ---
 
