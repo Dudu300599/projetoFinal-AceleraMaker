@@ -79,4 +79,4 @@ A solução conta com um plano de testes para assegurar o atendimento aos requis
 ### Testes Automatizados
 Além dos testes funcionais, o projeto possui 8 testes automatizados utilizando xUnit e Moq para garantia de regressão. A suíte garante desde a formatação correta da string de 99 caracteres até os retornos HTTP exatos do Controller.
 
-![Evidência dos Testes Automatizados no xUnit](caminho/para/sua_imagem_xunit.png)
+![Evidência dos Testes Automatizados no xUnit](assets/testes.png)
